@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
+import os
 
 # Load all assets
 model = pickle.load(open("model.pkl", "rb"))
@@ -12,6 +13,10 @@ df = pd.read_csv("cve_ttp_data.csv")
 model_bert = SentenceTransformer("bert_model")  # Load local dir
 
 app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Welcome to the CVE TTP Prediction API!"
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -33,6 +38,7 @@ def predict():
 
     return jsonify({"predicted_ttps": top_ttps})
 
-# For gunicorn on Render
-if __name__ != '__main__':
-    from main import app
+# Ensure the app runs correctly in the Render environment
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 10000))  # Get the port from the environment
+    app.run(host="0.0.0.0", port=port)  # Ensure the app listens on the correct port
