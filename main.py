@@ -4,15 +4,18 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
+from flask_cors import CORS  # Import CORS
 import os
+
+# Initialize Flask app and enable CORS for all routes
+app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 # Load all assets
 model = pickle.load(open("model.pkl", "rb"))
 embeddings = np.load("embeddings.npy")
 df = pd.read_csv("cve_ttp_data.csv")
 model_bert = SentenceTransformer("bert_model")  # Load local dir
-
-app = Flask(__name__)
 
 @app.route('/')
 def home():
