@@ -1,0 +1,38 @@
+from flask import Flask, request, jsonify
+import pickle
+import numpy as np
+import pandas as pd
+from sklearn.metrics.pairwise import cosine_similarity
+from sentence_transformers import SentenceTransformer
+
+# Load all assets
+model = pickle.load(open("model.pkl", "rb"))
+embeddings = np.load("embeddings.npy")
+df = pd.read_csv("cve_ttp_data.csv")
+model_bert = SentenceTransformer("bert_model")  # Load local dir
+
+app = Flask(__name__)
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    data = request.get_json()
+    description = data.get("description")
+
+    if not description:
+        return jsonify({"error": "Missing 'description' in request"}), 400
+
+    # Embed the new input
+    desc_embedding = model_bert.encode([description])
+
+    # Find cosine similarities
+    similarities = cosine_similarity(desc_embedding, embeddings)[0]
+    top_indices = similarities.argsort()[::-1][:5]
+
+    # Get top TTPs
+    top_ttps = df.iloc[top_indices]["TTP_ID"].unique().tolist()
+
+    return jsonify({"predicted_ttps": top_ttps})
+
+# For gunicorn on Render
+if __name__ != '__main__':
+    from main import app
