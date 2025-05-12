@@ -4,3 +4,5 @@ scikit-learn
 numpy
 pandas
 sentence-transformers
+python-dotenv
+flask-cors

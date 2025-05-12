@@ -1,15 +1,18 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS  # Import CORS
+from dotenv import load_dotenv
+load_dotenv()
 import pickle
 import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
-from flask_cors import CORS  # Import CORS
 import os
 
 # Initialize Flask app and enable CORS for all routes
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+allowed_origins = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+CORS(app, origins=allowed_origins)
 
 # Load all assets
 model = pickle.load(open("model.pkl", "rb"))
